@@ -1,0 +1,2 @@
+# LC_GAN_LSTM_SOH_Predict
+使用改进的GAN去生成数据，并使用生成的数据去训练LSTM网络，从而提高预测电池SOH的准确率
