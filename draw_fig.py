@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import pandas as pd
 from data_process import battery_path
+import os
 
 plt.rcParams["font.family"] = "Kaiti"
 
@@ -32,21 +33,29 @@ def draw_fig_of_capacity(feature_name):
     plt.show()
 
 
-# 可视化，某一次放电时电压，电流，温度，电流负载，电压负载随时间的变化
-def draw_fig():
-    data = pd.read_csv('./data/B0005/dis_1_cap_1.8564874208181574.csv')
+# 可视化，某个电池在某一次放电时电压，电流，温度，电流负载，电压负载随时间的变化
+def draw_fig(battery_name, discharge_num, feature_name):
+    data = pd.DataFrame()
+    dis = os.listdir('./data/' + battery_name)
+    for i in dis:
+        if 'dis_' + str(discharge_num) + '_' == i.split('cap')[0]:
+            data = pd.read_csv('./data/' + battery_name + '/' + i)
     # 图的配置
     font_color = ['r-', 'g-', 'b-', 'y-']
     plt.rcParams["font.family"] = "Kaiti"
     plt.title('影响因素随时间的变化')
     plt.xlabel('时间')
-    for name in data.columns[:-1]:
-        plt.ylabel(name)
-        plt.plot(data['time'], data[name], 'r-')
-        plt.show()
+    plt.ylabel(name)
+    plt.plot(data['time'], data[name], 'r-')
+    plt.show()
 
 
 if __name__ == '__main__':
     fea = ['voltage', 'temperature', 'time', 'capacity', 'soh']
-    for name in fea:
-        draw_fig_of_capacity(name)
+    feature = ['voltage', 'temperature']
+    b_name = 'B0005'
+    dis_num = 2
+    # for name in fea:
+        # draw_fig_of_capacity(name)
+    for name in feature:
+        draw_fig(b_name, dis_num, name)

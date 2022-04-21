@@ -25,10 +25,11 @@ def make_gan_dataset():
         while i < 5851:
             temp = []
             for name in feature:
-                # b[name] = transfer.fit_transform(np.array(b[name]).reshape(-1, 1))
                 temp.append(list(b[name][i:i + 117]))
             dataset.append(temp)
             i += 117
+    for i in range(0, len(dataset)):
+        dataset[i] = transfer.fit_transform(dataset[i])
     data_set = tf.data.Dataset.from_tensor_slices(dataset)
     print(len(dataset[0]), len(dataset))
     sample = next(iter(data_set))
@@ -46,9 +47,9 @@ def d_loss_fn(generator, discriminator, batch_z, batch_x, is_training):
     d_fake_logits = discriminator(fake_data, is_training)
     # 判定真实的数据
     d_real_logits = discriminator(batch_x, is_training)
-    # 真实图片与1之间的误差
+    # 真实数据与1之间的误差
     d_loss_real = celoss_ones(d_real_logits)
-    # 生成图片与0之间的误差
+    # 生成数据与0之间的误差
     d_loss_fake = celoss_zeros(d_fake_logits)
     # 合并误差
     loss = d_loss_fake + d_loss_real
@@ -84,8 +85,7 @@ def g_loss_fn(generator, discriminator, batch_z, is_training):
     return loss
 
 
-def train(ds):
-
+def train(dataset):
     tf.random.set_seed(22)
     np.random.seed(22)
     z_dim = 100  # 隐藏向量z的长度
@@ -94,8 +94,8 @@ def train(ds):
     learning_rate = 0.01
     is_training = True
     # 无限制的从ds中拿取数据，直到epoch训练完
-    ds = ds.repeat()
-    db_iter = iter(ds)
+    dataset = dataset.repeat()
+    db_iter = iter(dataset)
     # 创建生成器和判别器
     generator = Generator()
     generator.build(input_shape=(None, z_dim))
@@ -107,7 +107,7 @@ def train(ds):
 
     d_losses, g_losses = [], []
     for epoch in range(epochs):
-        for _ in range(1):
+        for _ in range(10):
             # 采样隐藏向量
             batch_z = tf.random.normal([batch_size, z_dim])
             # 采样真实图片
@@ -117,20 +117,26 @@ def train(ds):
                 d_loss = d_loss_fn(generator, discriminator, batch_z, batch_x, is_training)
             grads = tape.gradient(d_loss, discriminator.trainable_variables)
             d_optimizer.apply_gradients(zip(grads, discriminator.trainable_variables))
-        # 2. 训练生成器
-        # 采样隐藏向量
-        batch_z = tf.random.normal([batch_size, z_dim])
-        # 生成器前向计算
-        with tf.GradientTape() as tape:
-            g_loss = g_loss_fn(generator, discriminator, batch_z, is_training)
-        grads = tape.gradient(g_loss, generator.trainable_variables)
-        g_optimizer.apply_gradients(zip(grads, generator.trainable_variables))
+        for _ in range(30):
+            # 2. 训练生成器
+            # 采样隐藏向量
+            batch_z = tf.random.normal([batch_size, z_dim])
+            # 生成器前向计算
+            with tf.GradientTape() as tape:
+                g_loss = g_loss_fn(generator, discriminator, batch_z, is_training)
+            grads = tape.gradient(g_loss, generator.trainable_variables)
+            g_optimizer.apply_gradients(zip(grads, generator.trainable_variables))
 
         if epoch % 200 == 0:
             print(epoch, 'd-loss:', float(d_loss), 'g-loss:', float(g_loss))
             # 可视化
             z = tf.random.normal([100, z_dim])
             fake_data = generator(z, training=False)
+            # 数据反标准化
+            fake_data = fake_data.numpy()
+            for k in range(0, len(fake_data)):
+                fake_data[k] = transfer.inverse_transform(fake_data[k])
+            # 将生成的数据转化为DataFrame格式方便存入csv
             g_data = pd.DataFrame()
             for i in range(0, 100):
                 temp = pd.DataFrame(fake_data[i][0], columns=[feature[0]])
@@ -138,7 +144,7 @@ def train(ds):
                     t = pd.DataFrame(fake_data[i][j], columns=[feature[j]])
                     temp = temp.join(t, how='left')
                 g_data = pd.concat([g_data, temp], axis=0)
-
+            # 将生成的数据存入csv
             g_data[['discharge', 'voltage', 'temperature', 'time']] \
                 .to_csv('./data/generator_data/generator_data_%d.cvs' % epoch,
                         index=False, header=['discharge', 'voltage', 'temperature', 'time'])
@@ -146,7 +152,7 @@ def train(ds):
             d_losses.append(float(d_loss))
             g_losses.append(float(g_loss))
 
-            if epoch % 10000 == 1:
+            if epoch % 5000 == 1:
                 # print(d_losses)
                 # print(g_losses)
                 generator.save_weights('./model/generator.ckpt')

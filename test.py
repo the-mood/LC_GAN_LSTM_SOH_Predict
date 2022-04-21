@@ -14,10 +14,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from sklearn.preprocessing import StandardScaler
+data=pd.read_csv('./data/B0005.csv')
+lis = data['discharge']
 
-transfer=StandardScaler()
-data=pd.read_csv('./data/generator_data/generator_data_0.cvs')
-data=transfer.fit_transform(data[:117])
-data=transfer.inverse_transform(data)
-print()
 
+for j in range(0,10):
+    lis[j]=float((lis[j]-1)/167)

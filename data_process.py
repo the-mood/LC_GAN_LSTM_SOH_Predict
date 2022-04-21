@@ -10,11 +10,25 @@ import numpy as np
 import scipy.io as sio  # 读取mat文件
 import os
 import pandas as pd
+import tensorflow as tf
 
 base_path = r'D:\当前可能用到的文件\电池数据集\NASA_data'
 f_name = 'BatteryAgingARC-FY08Q4'
 # 获取当前路径下所有的.mat后缀的文件
 battery_path = glob.glob(os.path.join(base_path + '\\' + f_name, '*.mat'))
+fea = ['discharge', 'voltage', 'temperature', 'time', 'capacity']
+# b05,b06,b07
+# 反标准化所需
+max_dis = 168
+min_dis = 1
+max_vol = [3.621191033, 3.697169686, 3.428899305]
+min_vol = [3.205068916, 2.120698095, 1.813269431]
+max_tem = [41.45023192, 42.00754045, 42.33252237]
+min_tem = [37.80133585, 36.98024266, 38.34572084]
+max_time = 3690.234
+min_time = 2792.485
+max_cap = [1.856487421, 2.035337591, 1.891052295]
+min_cap = [1.287452522, 1.153818332, 1.40045524]
 
 
 # 对电池的数据进行处理
@@ -116,6 +130,21 @@ def battery_data_to_csv(data):
                     header=['discharge', 'voltage', 'temperature', 'time', 'capacity', 'soh'])
 
 
+# 将数据标准化以后存入csv
+def Standard_data_to_csv(data):
+    num = 7
+    for b_data in data:
+        for name in fea:
+            min = float(b_data[name].min())
+            max = float(b_data[name].max())
+            b_data[name] = b_data[name].astype('float')
+            for i in range(0, 168):
+                b_data[name][i] = (b_data[name][i] - min) / (max - min)
+        b_data[fea].to_csv('./data/Standard_data/b0' + str(num) + '.csv', index=False,
+                           header=['discharge', 'voltage', 'temperature', 'time', 'capacity'])
+        num -= 1
+
+
 # 将获取的数据存入到csv文件中
 def data_to_csv(data, battery_name):
     '''
@@ -171,4 +200,6 @@ if __name__ == '__main__':
     # # 获取数据
     b_05 = pd.read_csv('./data/B0005.csv')
     b_06 = pd.read_csv('./data/B0006.csv')
-    slide_window_to_extend_data([b_05, b_06])
+    b_07 = pd.read_csv('./data/B0007.csv')
+    Standard_data_to_csv([b_07, b_06, b_05])
+    # slide_window_to_extend_data([b_05, b_06])
