@@ -18,5 +18,8 @@ data=pd.read_csv('./data/B0005.csv')
 lis = data['discharge']
 
 
-for j in range(0,10):
-    lis[j]=float((lis[j]-1)/167)
+
+if len(os.listdir('./model'))==0:
+    print(2)
+else:
+    print(1)

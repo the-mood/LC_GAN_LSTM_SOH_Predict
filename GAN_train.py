@@ -11,6 +11,7 @@ from GAN import Generator, Discriminator
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
+import os
 
 b05 = pd.read_csv('./data/extend_data/b_05.csv')
 b06 = pd.read_csv('./data/extend_data/b_06.csv')
@@ -97,10 +98,18 @@ def train(dataset):
     dataset = dataset.repeat()
     db_iter = iter(dataset)
     # 创建生成器和判别器
-    generator = Generator()
-    generator.build(input_shape=(None, z_dim))
-    discriminator = Discriminator()
-    discriminator.build(input_shape=(None, 4, 117))
+    if os.listdir('./model') is not None:
+        generator = Generator()
+        generator.build(input_shape=(None, z_dim))
+        generator.load_weights('./model/generator.ckpt')
+        discriminator = Discriminator()
+        discriminator.build(input_shape=(None, 4, 117))
+        discriminator.load_weights('./model/discriminator.ckpt')
+    else:
+        generator = Generator()
+        generator.build(input_shape=(None, z_dim))
+        discriminator = Discriminator()
+        discriminator.build(input_shape=(None, 4, 117))
     # 创建优化器，两个优化器分别优化生成器和判别器
     g_optimizer = optimizers.Adam(learning_rate=learning_rate, beta_1=0.5)
     d_optimizer = optimizers.Adam(learning_rate=learning_rate, beta_1=0.5)
@@ -136,6 +145,7 @@ def train(dataset):
             fake_data = fake_data.numpy()
             for k in range(0, len(fake_data)):
                 fake_data[k] = transfer.inverse_transform(fake_data[k])
+                fake_data[k][0] = list(map(int, fake_data[k][0]))
             # 将生成的数据转化为DataFrame格式方便存入csv
             g_data = pd.DataFrame()
             for i in range(0, 100):
@@ -152,11 +162,11 @@ def train(dataset):
             d_losses.append(float(d_loss))
             g_losses.append(float(g_loss))
 
-            if epoch % 5000 == 1:
-                # print(d_losses)
-                # print(g_losses)
-                generator.save_weights('./model/generator.ckpt')
-                discriminator.save_weights('./model/discriminator.ckpt')
+        if epoch % 1000 == 1 and epoch != 1:
+            # print(d_losses)
+            # print(g_losses)
+            generator.save_weights('./model/generator.ckpt')
+            discriminator.save_weights('./model/discriminator.ckpt')
 
 
 if __name__ == '__main__':
