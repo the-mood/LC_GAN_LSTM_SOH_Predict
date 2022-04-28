@@ -15,7 +15,6 @@ import os
 
 b05 = pd.read_csv('./data/extend_data/b_05.csv')
 b06 = pd.read_csv('./data/extend_data/b_06.csv')
-feature = ['discharge', 'voltage', 'temperature', 'time']
 transfer = StandardScaler()
 
 
@@ -24,13 +23,10 @@ def make_gan_dataset():
     for b in [b05, b06]:
         i = 0
         while i < 5851:
-            temp = []
-            for name in feature:
-                temp.append(list(b[name][i:i + 117]))
-            dataset.append(temp)
+            dataset.append(list(b['voltage'][i:i + 117]))
             i += 117
     for i in range(0, len(dataset)):
-        dataset[i] = transfer.fit_transform(dataset[i])
+        dataset[i] = transfer.fit_transform(np.array(dataset[i]).reshape(-1, 1))
     data_set = tf.data.Dataset.from_tensor_slices(dataset)
     print(len(dataset[0]), len(dataset))
     sample = next(iter(data_set))
@@ -86,7 +82,7 @@ def g_loss_fn(generator, discriminator, batch_z, is_training):
     return loss
 
 
-def train(dataset):
+def train_for_generator_vol(dataset):
     tf.random.set_seed(22)
     np.random.seed(22)
     z_dim = 100  # 隐藏向量z的长度
@@ -98,7 +94,7 @@ def train(dataset):
     dataset = dataset.repeat()
     db_iter = iter(dataset)
     # 创建生成器和判别器
-    if os.listdir('./model') is not None:
+    if os.listdir('./model/vol') is not None:
         generator = Generator()
         generator.build(input_shape=(None, z_dim))
         generator.load_weights('./model/generator.ckpt')
@@ -116,6 +112,7 @@ def train(dataset):
 
     d_losses, g_losses = [], []
     for epoch in range(epochs):
+        # 训练鉴别器
         for _ in range(10):
             # 采样隐藏向量
             batch_z = tf.random.normal([batch_size, z_dim])
@@ -126,7 +123,8 @@ def train(dataset):
                 d_loss = d_loss_fn(generator, discriminator, batch_z, batch_x, is_training)
             grads = tape.gradient(d_loss, discriminator.trainable_variables)
             d_optimizer.apply_gradients(zip(grads, discriminator.trainable_variables))
-        for _ in range(30):
+        # 训练生成器
+        for _ in range(10):
             # 2. 训练生成器
             # 采样隐藏向量
             batch_z = tf.random.normal([batch_size, z_dim])
@@ -138,26 +136,22 @@ def train(dataset):
 
         if epoch % 200 == 0:
             print(epoch, 'd-loss:', float(d_loss), 'g-loss:', float(g_loss))
-            # 可视化
-            z = tf.random.normal([100, z_dim])
+            # 用当前的生成器生成数据
+            z = tf.random.normal([102, z_dim])
             fake_data = generator(z, training=False)
             # 数据反标准化
             fake_data = fake_data.numpy()
             for k in range(0, len(fake_data)):
                 fake_data[k] = transfer.inverse_transform(fake_data[k])
-                fake_data[k][0] = list(map(int, fake_data[k][0]))
             # 将生成的数据转化为DataFrame格式方便存入csv
             g_data = pd.DataFrame()
-            for i in range(0, 100):
+            for i in range(0, 102):
                 temp = pd.DataFrame(fake_data[i][0], columns=[feature[0]])
-                for j in range(1, 4):
-                    t = pd.DataFrame(fake_data[i][j], columns=[feature[j]])
-                    temp = temp.join(t, how='left')
                 g_data = pd.concat([g_data, temp], axis=0)
             # 将生成的数据存入csv
-            g_data[['discharge', 'voltage', 'temperature', 'time']] \
-                .to_csv('./data/generator_data/generator_data_%d.cvs' % epoch,
-                        index=False, header=['discharge', 'voltage', 'temperature', 'time'])
+            g_data[['voltage']] \
+                .to_csv('./data/generator_data/voltage/generator_data_%d.cvs' % epoch,
+                        index=False, header=['voltage'])
 
             d_losses.append(float(d_loss))
             g_losses.append(float(g_loss))
@@ -165,10 +159,10 @@ def train(dataset):
         if epoch % 1000 == 1 and epoch != 1:
             # print(d_losses)
             # print(g_losses)
-            generator.save_weights('./model/generator_'+str(epoch)+'.ckpt',)
-            discriminator.save_weights('./model/discriminator_'+str(epoch)+'.ckpt')
+            generator.save_weights('./model/vol/generator_'+str(epoch)+'.ckpt',)
+            discriminator.save_weights('./model/vol/discriminator_'+str(epoch)+'.ckpt')
 
 
 if __name__ == '__main__':
     ds = make_gan_dataset()
-    train(ds)
+    train_for_generator_vol(ds)

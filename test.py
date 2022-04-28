@@ -14,12 +14,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from sklearn.preprocessing import StandardScaler
-data=pd.read_csv('./data/B0005.csv')
-lis = data['discharge']
 
-
-
-if len(os.listdir('./model'))==0:
-    print(2)
-else:
-    print(1)
+input_shape = (4, 10, 128)
+print(input_shape[1:])

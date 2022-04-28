@@ -23,7 +23,7 @@ class Generator(keras.Model):
         self.fc4 = Dense(256)
         self.bn3 = BatchNormalization()
 
-        self.fc5 = Dense(468)
+        self.fc5 = Dense(117)
 
     def call(self, inputs, training=None, mask=None):
         # [b,inputs]=>[b,128]
@@ -36,7 +36,7 @@ class Generator(keras.Model):
         x = tf.nn.leaky_relu(self.bn3(self.fc4(x), training=training))
         # [b,256]=>[b,468]
         x = self.fc5(x)
-        out = tf.reshape(x, (-1, 4, 117))
+        out = tf.reshape(x, (-1, 117, 1))
         # out = tf.nn.tanh(x)
         return out
 
@@ -50,7 +50,7 @@ class Discriminator(keras.Model):
         self.fc4 = Dense(1)
 
     def call(self, inputs, training=None, mask=None):
-        inputs = tf.reshape(inputs, (-1, 468))
+        # inputs = tf.reshape(inputs, (-1, 468))
         x = tf.nn.leaky_relu(self.fc3(inputs))
         x = tf.nn.leaky_relu(self.fc2(x))
         x = tf.nn.leaky_relu(self.fc1(x))
@@ -62,7 +62,7 @@ class Discriminator(keras.Model):
 def test():
     g = Generator()
     d = Discriminator()
-    x = tf.random.normal([2, 4, 117])
+    x = tf.random.normal([2, 117, 1])
     z = tf.random.normal([2, 100])
     prob = d(x)
     print(prob)
