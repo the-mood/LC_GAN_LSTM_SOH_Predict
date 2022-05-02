@@ -170,10 +170,10 @@ if __name__ == '__main__':
     #     for i in range(1, 169):
     #         draw_ic_curve(b_name, i, 'ic')
 
-    # fea = ['temperature', 'time', 'capacity', 'soh']
-    # feature = ['voltage', 'temperature']
-    # for name in fea:
-    #     draw_fig_of_feature(name)
+    fea = ['temperature', 'time', 'capacity', 'soh', 'ic']
+    feature = ['voltage', 'temperature']
+    for name in fea:
+        draw_fig_of_feature(name)
 
     # for b_name in b_names:
     #     for i in range(1, 169):
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     #     for i in range(1, 171):
     #         for name in feature:
     #             draw_fig_for_one_charge(b_name, i, name)
-    fea=['time','temperature']
-    for f in fea:
-        draw_fig_of_feature_charge(f)
+    # fea=['time','temperature']
+    # for f in fea:
+    #     draw_fig_of_feature_charge(f)
     '''放电数据画图----结束'''

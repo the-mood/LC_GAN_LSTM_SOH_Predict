@@ -213,6 +213,24 @@ def slide_window_to_extend_data(data):
         num += 1
 
 
+# 使用滑动窗口对IC进行扩展
+def slide_window_to_extend_IC_data():
+    data_5 = pd.read_csv('./data/B0005_discharge.csv')
+    data_6 = pd.read_csv('./data/B0006_discharge.csv')
+    data_5 = data_5.drop(data_5.index[data_5['discharge'] == 61])
+    data_6 = data_6.drop(data_6.index[data_6['discharge'] == 61])
+    data = [data_5, data_6]
+    num = 5
+    for b_data in data:
+        temp_data = b_data[0:117]
+        for i in range(1, 51):
+            temp_data = pd.concat([temp_data, b_data[i:i + 117]], axis=0)
+        temp_data[['discharge', 'ic']] \
+            .to_csv('./data/extend_data/b_0' + str(num) + '_dis_ic.csv',
+                    index=False, header=['discharge', 'ic'])
+        num += 1
+
+
 '''对电池放电数据的处理---结束'''
 
 '''对电池充电数据的处理---开始'''
@@ -273,7 +291,7 @@ def process_charge_data(file_name, b_name):
             charge_data_to_csv(temp_dict, b_name)
 
             t_dict = {'charge': charge_Num,
-                      'temperature':np.max(np.array(data_B[0][0][0][0][i][3][0][0][2][0])),
+                      'temperature': np.max(np.array(data_B[0][0][0][0][i][3][0][0][2][0])),
                       'time': np.array(data_B[0][0][0][0][i][3][0][0][5][0])[-1],
                       }
             b_data.append(t_dict)
@@ -308,6 +326,7 @@ def charge_data_to_csv(data, battery_name):
         header=['voltage', 'current', 'temperature', 'current_charge', 'voltage_charge', 'time'])
 
 
+# 将电池充电数据中可用特征存入csv
 def charge_battery_data_to_csv(data):
     '''
         :param data:    data=get_charge_data()
@@ -333,8 +352,28 @@ def charge_battery_data_to_csv(data):
                     header=['charge', 'temperature', 'time'])
 
 
-'''对电池充电数据的处理---结束'''
+# 对电池充电特征数据进行扩展
+def slide_window_to_extend_charge_data(data):
+    '''
+        :param data: pd.DataFrame格式，charge、temperature、time
+            将扩展以后的数据写入csv
+        :return:
+        '''
+    num = 5
+    for b_data in data:
+        b_data = b_data.drop(b_data.index[b_data['charge'] == 33])
+        b_data = b_data.drop(b_data.index[b_data['charge'] == 170])
+        temp_data = b_data[0:117]
+        for i in range(1, 51):
+            temp_data = pd.concat([temp_data, b_data[i:i + 117]], axis=0)
 
+        temp_data[['charge', 'temperature', 'time']] \
+            .to_csv('./data/extend_data/b_0' + str(num) + '_charge.csv',
+                    index=False, header=['charge', 'temperature', 'time'])
+        num += 1
+
+
+'''对电池充电数据的处理---结束'''
 
 # 将电池特征数据数据存入csv
 # def battery_data_to_csv():
@@ -372,8 +411,12 @@ if __name__ == '__main__':
     # b_07 = pd.read_csv('./data/B0007.csv')
     # Standard_data_to_csv([b_07, b_06, b_05])
     # slide_window_to_extend_data([b_05, b_06])
+    slide_window_to_extend_IC_data()
 
     # 充电数据获取和处理
-    charge_data = get_charge_data()
-    charge_battery_data_to_csv(charge_data)
+    # charge_data = get_charge_data()
+    # charge_battery_data_to_csv(charge_data)
+    # b_05 = pd.read_csv('./data/B0005_charge.csv')
+    # b_06 = pd.read_csv('./data/B0006_charge.csv')
+    # slide_window_to_extend_charge_data([b_05, b_06])
     # battery_data_to_csv()

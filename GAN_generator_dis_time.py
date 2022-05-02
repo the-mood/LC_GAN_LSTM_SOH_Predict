@@ -1,13 +1,13 @@
 """
 作者：杨文豪
 
-描述：GAN训练
+描述：GAN训练生成电池放电时的最高温度
 
 时间：2022/4/15 9:19
 """
 import tensorflow as tf
 from tensorflow.keras import optimizers
-from GAN import Generator, Discriminator
+from GAN import Generator, Discriminator,d_loss_fn,g_loss_fn
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
@@ -23,7 +23,7 @@ def make_gan_dataset():
     for b in [b05, b06]:
         i = 0
         while i < 5851:
-            dataset.append(list(b['voltage'][i:i + 117]))
+            dataset.append(list(b['time'][i:i + 117]))
             i += 117
     for i in range(0, len(dataset)):
         dataset[i] = transfer.fit_transform(np.array(dataset[i]).reshape(-1, 1))
@@ -36,53 +36,8 @@ def make_gan_dataset():
     return data_set
 
 
-# 计算判别器的误差函数
-def d_loss_fn(generator, discriminator, batch_z, batch_x, is_training):
-    # 采样生成的数据
-    fake_data = generator(batch_z, is_training)
-    # 判定生成的数据
-    d_fake_logits = discriminator(fake_data, is_training)
-    # 判定真实的数据
-    d_real_logits = discriminator(batch_x, is_training)
-    # 真实数据与1之间的误差
-    d_loss_real = celoss_ones(d_real_logits)
-    # 生成数据与0之间的误差
-    d_loss_fake = celoss_zeros(d_fake_logits)
-    # 合并误差
-    loss = d_loss_fake + d_loss_real
 
-    return loss
-
-
-# 计算属于与标签为1的交叉熵
-def celoss_ones(logits):
-    loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=tf.ones_like(logits))
-    # y = tf.ones_like(logits)
-    # loss = losses.binary_crossentropy(y, logits, from_logits=True)
-    return tf.reduce_mean(loss)
-
-
-# 计算属于与便签为0的交叉熵
-def celoss_zeros(logits):
-    loss = tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=tf.zeros_like(logits))
-    # y = tf.zeros_like(logits)
-    # loss = losses.binary_crossentropy(y, logits, from_logits=True)
-    return tf.reduce_mean(loss)
-
-
-# 计算生成器的误差函数
-def g_loss_fn(generator, discriminator, batch_z, is_training):
-    # 采样生成图片
-    fake_data = generator(batch_z, is_training)
-    # 在训练生成网络时，需要迫使生成图片判定为真
-    d_fake_logits = discriminator(fake_data, is_training)
-    # 计算生成图片与1之间的误差
-    loss = celoss_ones(d_fake_logits)
-
-    return loss
-
-
-def train_for_generator_vol(dataset):
+def train_for_generator_dis_time(dataset):
     tf.random.set_seed(22)
     np.random.seed(22)
     z_dim = 100  # 隐藏向量z的长度
@@ -94,18 +49,18 @@ def train_for_generator_vol(dataset):
     dataset = dataset.repeat()
     db_iter = iter(dataset)
     # 创建生成器和判别器
-    if os.listdir('./model/vol') is not None:
+    if len(os.listdir('./model/dis_time')) != 0:
         generator = Generator()
         generator.build(input_shape=(None, z_dim))
-        generator.load_weights('./model/generator.ckpt')
+        generator.load_weights('./model/dis_time/generator.ckpt')
         discriminator = Discriminator()
-        discriminator.build(input_shape=(None, 4, 117))
-        discriminator.load_weights('./model/discriminator.ckpt')
+        discriminator.build(input_shape=(None, 117, 1))
+        discriminator.load_weights('./model/dis_time/discriminator.ckpt')
     else:
         generator = Generator()
         generator.build(input_shape=(None, z_dim))
         discriminator = Discriminator()
-        discriminator.build(input_shape=(None, 4, 117))
+        discriminator.build(input_shape=(None, 117, 1))
     # 创建优化器，两个优化器分别优化生成器和判别器
     g_optimizer = optimizers.Adam(learning_rate=learning_rate, beta_1=0.5)
     d_optimizer = optimizers.Adam(learning_rate=learning_rate, beta_1=0.5)
@@ -146,12 +101,12 @@ def train_for_generator_vol(dataset):
             # 将生成的数据转化为DataFrame格式方便存入csv
             g_data = pd.DataFrame()
             for i in range(0, 102):
-                temp = pd.DataFrame(fake_data[i][0], columns=[feature[0]])
+                temp = pd.DataFrame(fake_data[i], columns=['dis_time'])
                 g_data = pd.concat([g_data, temp], axis=0)
             # 将生成的数据存入csv
-            g_data[['voltage']] \
-                .to_csv('./data/generator_data/voltage/generator_data_%d.cvs' % epoch,
-                        index=False, header=['voltage'])
+            g_data[['dis_time']] \
+                .to_csv('./data/generator_data/dis_time/generator_data_%d.cvs' % epoch,
+                        index=False, header=['dis_time'])
 
             d_losses.append(float(d_loss))
             g_losses.append(float(g_loss))
@@ -159,10 +114,10 @@ def train_for_generator_vol(dataset):
         if epoch % 1000 == 1 and epoch != 1:
             # print(d_losses)
             # print(g_losses)
-            generator.save_weights('./model/vol/generator_'+str(epoch)+'.ckpt',)
-            discriminator.save_weights('./model/vol/discriminator_'+str(epoch)+'.ckpt')
+            generator.save_weights('./model/dis_time/generator_'+str(epoch)+'.ckpt',)
+            discriminator.save_weights('./model/dis_time/discriminator_'+str(epoch)+'.ckpt')
 
 
 if __name__ == '__main__':
     ds = make_gan_dataset()
-    train_for_generator_vol(ds)
+    train_for_generator_dis_time(ds)

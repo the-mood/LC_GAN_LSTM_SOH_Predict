@@ -13,8 +13,8 @@ from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import os
 
-b05 = pd.read_csv('./data/extend_data/b_05.csv')
-b06 = pd.read_csv('./data/extend_data/b_06.csv')
+b05 = pd.read_csv('./data/extend_data/b_05_charge.csv')
+b06 = pd.read_csv('./data/extend_data/b_06_charge.csv')
 transfer = StandardScaler()
 
 
@@ -23,7 +23,7 @@ def make_gan_dataset():
     for b in [b05, b06]:
         i = 0
         while i < 5851:
-            dataset.append(list(b['temperature'][i:i + 117]))
+            dataset.append(list(b['time'][i:i + 117]))
             i += 117
     for i in range(0, len(dataset)):
         dataset[i] = transfer.fit_transform(np.array(dataset[i]).reshape(-1, 1))
@@ -36,7 +36,7 @@ def make_gan_dataset():
     return data_set
 
 
-def train_for_generator_tem(dataset):
+def train_for_generator_charge_time(dataset):
     tf.random.set_seed(22)
     np.random.seed(22)
     z_dim = 100  # 隐藏向量z的长度
@@ -48,19 +48,18 @@ def train_for_generator_tem(dataset):
     dataset = dataset.repeat()
     db_iter = iter(dataset)
     # 创建生成器和判别器
-    if len(os.listdir('./model/tem')) != 0:
+    if len(os.listdir('./model/charge_time')) != 0:
         generator = Generator()
         generator.build(input_shape=(None, z_dim))
-        generator.load_weights('./model/tem/generator.ckpt')
+        generator.load_weights('./model/charge_time/generator.ckpt')
         discriminator = Discriminator()
         discriminator.build(input_shape=(None, 117, 1))
-        discriminator.load_weights('./model/tem/discriminator.ckpt')
+        discriminator.load_weights('./model/charge_time/discriminator.ckpt')
     else:
         generator = Generator()
         generator.build(input_shape=(None, z_dim))
         discriminator = Discriminator()
         discriminator.build(input_shape=(None, 117, 1))
-
     # 创建优化器，两个优化器分别优化生成器和判别器
     g_optimizer = optimizers.Adam(learning_rate=learning_rate, beta_1=0.5)
     d_optimizer = optimizers.Adam(learning_rate=learning_rate, beta_1=0.5)
@@ -101,12 +100,12 @@ def train_for_generator_tem(dataset):
             # 将生成的数据转化为DataFrame格式方便存入csv
             g_data = pd.DataFrame()
             for i in range(0, 102):
-                temp = pd.DataFrame(fake_data[i], columns=['temperature'])
+                temp = pd.DataFrame(fake_data[i], columns=['charge_time'])
                 g_data = pd.concat([g_data, temp], axis=0)
             # 将生成的数据存入csv
-            g_data[['temperature']] \
-                .to_csv('./data/generator_data/temperature/generator_data_%d.cvs' % epoch,
-                        index=False, header=['temperature'])
+            g_data[['charge_time']] \
+                .to_csv('./data/generator_data/charge_time/generator_data_%d.cvs' % epoch,
+                        index=False, header=['charge_time'])
 
             d_losses.append(float(d_loss))
             g_losses.append(float(g_loss))
@@ -114,10 +113,10 @@ def train_for_generator_tem(dataset):
         if epoch % 1000 == 1 and epoch != 1:
             # print(d_losses)
             # print(g_losses)
-            generator.save_weights('./model/tem/generator_'+str(epoch)+'.ckpt',)
-            discriminator.save_weights('./model/tem/discriminator_'+str(epoch)+'.ckpt')
+            generator.save_weights('./model/charge_time/generator_'+str(epoch)+'.ckpt',)
+            discriminator.save_weights('./model/charge_time/discriminator_'+str(epoch)+'.ckpt')
 
 
 if __name__ == '__main__':
     ds = make_gan_dataset()
-    train_for_generator_tem(ds)
+    train_for_generator_charge_time(ds)
