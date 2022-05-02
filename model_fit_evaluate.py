@@ -29,9 +29,9 @@ Lstm_model.summary()
 Lstm_model.compile(optimizer=optimizers.RMSprop(0.01), loss=losses.mse, metrics=['accuracy'])
 
 # 获取数据
-b_05 = pd.read_csv('./data/B0005.csv')
-b_06 = pd.read_csv('./data/B0006.csv')
-b_07 = pd.read_csv('./data/B0007.csv')
+b_05 = pd.read_csv('./data/B0005.csv.csv')
+b_06 = pd.read_csv('./data/B0006.csv.csv')
+b_07 = pd.read_csv('./data/B0007.csv.csv')
 # b_18 = pd.read_csv('./data/B0018.csv')
 
 '''使用StandardScaler进行标准化，再去训练'''

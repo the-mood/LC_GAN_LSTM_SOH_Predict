@@ -50,7 +50,7 @@ class Discriminator(keras.Model):
         self.fc4 = Dense(1)
 
     def call(self, inputs, training=None, mask=None):
-        # inputs = tf.reshape(inputs, (-1, 468))
+        inputs = tf.reshape(inputs, (-1, 117))
         x = tf.nn.leaky_relu(self.fc3(inputs))
         x = tf.nn.leaky_relu(self.fc2(x))
         x = tf.nn.leaky_relu(self.fc1(x))
