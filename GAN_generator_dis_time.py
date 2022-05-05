@@ -1,13 +1,13 @@
 """
 作者：杨文豪
 
-描述：GAN训练生成电池放电时的最高温度
+描述：GAN训练生成电池放电时的放电时间
 
 时间：2022/4/15 9:19
 """
 import tensorflow as tf
 from tensorflow.keras import optimizers
-from GAN import Generator, Discriminator,d_loss_fn,g_loss_fn
+from GAN import Generator, Discriminator, d_loss_fn, g_loss_fn
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
@@ -23,7 +23,7 @@ def make_gan_dataset():
     for b in [b05, b06]:
         i = 0
         while i < 5851:
-            dataset.append(list(b['time'][i:i + 117]))
+            dataset.append(list(b['discharge_time'][i:i + 117]))
             i += 117
     for i in range(0, len(dataset)):
         dataset[i] = transfer.fit_transform(np.array(dataset[i]).reshape(-1, 1))
@@ -36,10 +36,9 @@ def make_gan_dataset():
     return data_set
 
 
-
 def train_for_generator_dis_time(dataset):
-    tf.random.set_seed(22)
-    np.random.seed(22)
+    tf.random.set_seed(2222)
+    np.random.seed(2222)
     z_dim = 100  # 隐藏向量z的长度
     epochs = 30000  # 训练步数
     batch_size = 64
@@ -48,18 +47,17 @@ def train_for_generator_dis_time(dataset):
     # 无限制的从ds中拿取数据，直到epoch训练完
     dataset = dataset.repeat()
     db_iter = iter(dataset)
+    generator = Generator()
+    discriminator = Discriminator()
+
     # 创建生成器和判别器
     if len(os.listdir('./model/dis_time')) != 0:
-        generator = Generator()
         generator.build(input_shape=(None, z_dim))
         generator.load_weights('./model/dis_time/generator.ckpt')
-        discriminator = Discriminator()
         discriminator.build(input_shape=(None, 117, 1))
         discriminator.load_weights('./model/dis_time/discriminator.ckpt')
     else:
-        generator = Generator()
         generator.build(input_shape=(None, z_dim))
-        discriminator = Discriminator()
         discriminator.build(input_shape=(None, 117, 1))
     # 创建优化器，两个优化器分别优化生成器和判别器
     g_optimizer = optimizers.Adam(learning_rate=learning_rate, beta_1=0.5)
@@ -79,7 +77,7 @@ def train_for_generator_dis_time(dataset):
             grads = tape.gradient(d_loss, discriminator.trainable_variables)
             d_optimizer.apply_gradients(zip(grads, discriminator.trainable_variables))
         # 训练生成器
-        for _ in range(10):
+        for _ in range(30):
             # 2. 训练生成器
             # 采样隐藏向量
             batch_z = tf.random.normal([batch_size, z_dim])
@@ -114,8 +112,8 @@ def train_for_generator_dis_time(dataset):
         if epoch % 1000 == 1 and epoch != 1:
             # print(d_losses)
             # print(g_losses)
-            generator.save_weights('./model/dis_time/generator_'+str(epoch)+'.ckpt',)
-            discriminator.save_weights('./model/dis_time/discriminator_'+str(epoch)+'.ckpt')
+            generator.save_weights('./model/dis_time/generator_' + str(epoch) + '.ckpt', )
+            discriminator.save_weights('./model/dis_time/discriminator_' + str(epoch) + '.ckpt')
 
 
 if __name__ == '__main__':

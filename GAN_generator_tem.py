@@ -37,8 +37,8 @@ def make_gan_dataset():
 
 
 def train_for_generator_tem(dataset):
-    tf.random.set_seed(22)
-    np.random.seed(22)
+    tf.random.set_seed(2222)
+    np.random.seed(2222)
     z_dim = 100  # 隐藏向量z的长度
     epochs = 30000  # 训练步数
     batch_size = 64
@@ -48,7 +48,7 @@ def train_for_generator_tem(dataset):
     dataset = dataset.repeat()
     db_iter = iter(dataset)
     # 创建生成器和判别器
-    if len(os.listdir('./model/tem')) != 0:
+    if len(os.listdir('./model/tem')) != 1:
         generator = Generator()
         generator.build(input_shape=(None, z_dim))
         generator.load_weights('./model/tem/generator.ckpt')
@@ -79,7 +79,7 @@ def train_for_generator_tem(dataset):
             grads = tape.gradient(d_loss, discriminator.trainable_variables)
             d_optimizer.apply_gradients(zip(grads, discriminator.trainable_variables))
         # 训练生成器
-        for _ in range(10):
+        for _ in range(30):
             # 2. 训练生成器
             # 采样隐藏向量
             batch_z = tf.random.normal([batch_size, z_dim])

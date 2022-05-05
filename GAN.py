@@ -59,7 +59,6 @@ class Discriminator(keras.Model):
         return out
 
 
-
 # 计算判别器的误差函数
 def d_loss_fn(generator, discriminator, batch_z, batch_x, is_training):
     # 采样生成的数据
@@ -104,6 +103,7 @@ def g_loss_fn(generator, discriminator, batch_z, is_training):
     loss = celoss_ones(d_fake_logits)
 
     return loss
+
 
 def test():
     g = Generator()

@@ -23,7 +23,7 @@ def make_gan_dataset():
     for b in [b05, b06]:
         i = 0
         while i < 5851:
-            dataset.append(list(b['time'][i:i + 117]))
+            dataset.append(list(b['charge_time'][i:i + 117]))
             i += 117
     for i in range(0, len(dataset)):
         dataset[i] = transfer.fit_transform(np.array(dataset[i]).reshape(-1, 1))
@@ -37,8 +37,8 @@ def make_gan_dataset():
 
 
 def train_for_generator_charge_time(dataset):
-    tf.random.set_seed(22)
-    np.random.seed(22)
+    tf.random.set_seed(2222)
+    np.random.seed(2222)
     z_dim = 100  # 隐藏向量z的长度
     epochs = 30000  # 训练步数
     batch_size = 64
@@ -78,7 +78,7 @@ def train_for_generator_charge_time(dataset):
             grads = tape.gradient(d_loss, discriminator.trainable_variables)
             d_optimizer.apply_gradients(zip(grads, discriminator.trainable_variables))
         # 训练生成器
-        for _ in range(10):
+        for _ in range(30):
             # 2. 训练生成器
             # 采样隐藏向量
             batch_z = tf.random.normal([batch_size, z_dim])

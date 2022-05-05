@@ -138,7 +138,7 @@ def data_to_csv(data, battery_name):
         './data/discharge_data/' + battery_name + '/dis_' + str(data.get('discharge')) + '_cap_' + str(
             data.get('capacity')[0]) + '.csv',
         index=False,
-        header=['voltage', 'current', 'temperature', 'current_load', 'voltage_load', 'time', 'ic'])
+        header=['voltage', 'current', 'temperature', 'current_load', 'voltage_load', 'discharge_time', 'ic'])
 
 
 # 将放电数据--特征数据存入csv中
@@ -174,9 +174,9 @@ def discharge_battery_data_to_csv(data):
         ic = pd.DataFrame(ic, columns=['ic'])
         temp = dis.join(vol, how='left').join(tem, how='left').join(time, how='left') \
             .join(cap, how='left').join(soh, how='left').join(ic, how='left')
-        temp[['discharge', 'temperature', 'time', 'capacity', 'soh', 'ic']] \
+        temp[['discharge', 'temperature', 'time', 'ic', 'capacity', 'soh']] \
             .to_csv('./data/' + battery_name + '_discharge.csv', index=False,
-                    header=['discharge', 'temperature', 'time', 'capacity', 'soh', 'ic'])
+                    header=['discharge', 'temperature', 'discharge_time', 'ic', 'capacity', 'soh'])
 
 
 # 将数据标准化以后存入csv
@@ -207,9 +207,9 @@ def slide_window_to_extend_data(data):
         for i in range(1, 51):
             temp_data = pd.concat([temp_data, b_data[i:i + 117]], axis=0)
 
-        temp_data[['discharge', 'voltage', 'temperature', 'time', 'capacity', 'soh']] \
+        temp_data[['discharge', 'temperature', 'discharge_time', 'capacity', 'soh']] \
             .to_csv('./data/extend_data/b_0' + str(num) + '.csv',
-                    index=False, header=['discharge', 'voltage', 'temperature', 'time', 'capacity', 'soh'])
+                    index=False, header=['discharge', 'temperature', 'discharge_time', 'capacity', 'soh'])
         num += 1
 
 
@@ -217,8 +217,8 @@ def slide_window_to_extend_data(data):
 def slide_window_to_extend_IC_data():
     data_5 = pd.read_csv('./data/B0005_discharge.csv')
     data_6 = pd.read_csv('./data/B0006_discharge.csv')
-    data_5 = data_5.drop(data_5.index[data_5['discharge'] == 61])
-    data_6 = data_6.drop(data_6.index[data_6['discharge'] == 61])
+    data_5 = data_5.drop(data_5.index[data_5['discharge'] == 61], inplace=True)
+    data_6 = data_6.drop(data_6.index[data_6['discharge'] == 61], inplace=True)
     data = [data_5, data_6]
     num = 5
     for b_data in data:
@@ -323,7 +323,7 @@ def charge_data_to_csv(data, battery_name):
         .to_csv(
         './data/charge_data/' + battery_name + '/charge_' + str(data.get('charge')) + '.csv',
         index=False,
-        header=['voltage', 'current', 'temperature', 'current_charge', 'voltage_charge', 'time'])
+        header=['voltage', 'current', 'temperature', 'current_charge', 'voltage_charge', 'charge_time'])
 
 
 # 将电池充电数据中可用特征存入csv
@@ -349,7 +349,7 @@ def charge_battery_data_to_csv(data):
         temp = charge.join(tem, how='left').join(time, how='left')
         temp[['charge', 'temperature', 'time']] \
             .to_csv('./data/' + battery_name + '_charge.csv', index=False,
-                    header=['charge', 'temperature', 'time'])
+                    header=['charge', 'temperature', 'charge_time'])
 
 
 # 对电池充电特征数据进行扩展
@@ -367,9 +367,9 @@ def slide_window_to_extend_charge_data(data):
         for i in range(1, 51):
             temp_data = pd.concat([temp_data, b_data[i:i + 117]], axis=0)
 
-        temp_data[['charge', 'temperature', 'time']] \
+        temp_data[['charge', 'temperature', 'charge_time']] \
             .to_csv('./data/extend_data/b_0' + str(num) + '_charge.csv',
-                    index=False, header=['charge', 'temperature', 'time'])
+                    index=False, header=['charge', 'temperature', 'charge_time'])
         num += 1
 
 
@@ -405,13 +405,14 @@ if __name__ == '__main__':
     # data = get_data()
     # discharge_battery_data_to_csv(data)
     # data_to_csv(data)
+
     # # 获取数据
-    # b_05 = pd.read_csv('./data/B0005.csv')
-    # b_06 = pd.read_csv('./data/B0006.csv')
+    b_05 = pd.read_csv('./data/B0005_discharge.csv')
+    b_06 = pd.read_csv('./data/B0006_discharge.csv')
     # b_07 = pd.read_csv('./data/B0007.csv')
     # Standard_data_to_csv([b_07, b_06, b_05])
-    # slide_window_to_extend_data([b_05, b_06])
-    slide_window_to_extend_IC_data()
+    slide_window_to_extend_data([b_05, b_06])
+    # slide_window_to_extend_IC_data()
 
     # 充电数据获取和处理
     # charge_data = get_charge_data()

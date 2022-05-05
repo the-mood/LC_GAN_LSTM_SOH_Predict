@@ -170,7 +170,7 @@ if __name__ == '__main__':
     #     for i in range(1, 169):
     #         draw_ic_curve(b_name, i, 'ic')
 
-    fea = ['temperature', 'time', 'capacity', 'soh', 'ic']
+    fea = ['temperature', 'discharge_time', 'capacity', 'soh', 'ic']
     feature = ['voltage', 'temperature']
     for name in fea:
         draw_fig_of_feature(name)
