@@ -13,16 +13,16 @@ import keras
 class Generator(keras.Model):
     def __init__(self):
         super(Generator, self).__init__()
-        self.conv1 = Conv1D(128, kernel_size=3, activation=tf.nn.leaky_relu)
+        self.conv1 = Conv1D(512, kernel_size=3, activation=tf.nn.leaky_relu)
         self.conv2 = Conv1D(256, kernel_size=3, activation=tf.nn.leaky_relu)
-        self.conv3 = Conv1D(512, kernel_size=3, activation=tf.nn.leaky_relu)
+        self.conv3 = Conv1D(117, kernel_size=3, activation=tf.nn.leaky_relu)
         self.lstm1 = LSTM(128, return_sequences=True, dropout=0.2)
         self.lstm2 = LSTM(256, return_sequences=True, dropout=0.2)
         self.lstm3 = LSTM(512, return_sequences=True, dropout=0.2)
         self.dense1 = Dense(128)
         self.dense2 = Dense(256)
         self.dense3 = Dense(512)
-        self.dense = Dense(117)
+        self.dense = Dense(1)
         self.flatten = Flatten()
 
     def call(self, inputs, training=None, mask=None):
@@ -37,7 +37,7 @@ class Generator(keras.Model):
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.flatten(x)
-        x = tf.reshape(x, (2, 4, -1))
+        x = tf.reshape(x, (2, 117, -1))
         out = self.dense(x)
         return out
 
@@ -48,12 +48,13 @@ class Discriminator(keras.Model):
         self.lstm1 = LSTM(128, return_sequences=True, dropout=0.2)
         self.lstm2 = LSTM(256, return_sequences=True, dropout=0.2)
         self.lstm3 = LSTM(512, return_sequences=True, dropout=0.2)
-        self.dconv1 = Conv1DTranspose(512, kernel_size=3, activation=tf.nn.leaky_relu)
-        self.dconv2 = Conv1DTranspose(256, kernel_size=3, activation=tf.nn.leaky_relu)
-        self.dconv3 = Conv1DTranspose(128, kernel_size=3, activation=tf.nn.leaky_relu)
+        self.dconv1 = Conv1DTranspose(256, kernel_size=3, activation=tf.nn.leaky_relu)
+        self.dconv2 = Conv1DTranspose(128, kernel_size=3, activation=tf.nn.leaky_relu)
+        self.dconv3 = Conv1DTranspose(64, kernel_size=3, activation=tf.nn.leaky_relu)
         self.dense1 = Dense(512)
         self.dense2 = Dense(256)
         self.dense3 = Dense(117)
+        self.dense4 = Dense(1)
         self.flatten = Flatten()
 
     def call(self, inputs, training=None, mask=None):
@@ -66,7 +67,8 @@ class Discriminator(keras.Model):
         x = self.flatten(x)
         x = self.dense1(x)
         x = self.dense2(x)
-        out = self.dense3(x)
+        x = self.dense3(x)
+        out = self.dense4(x)
         return out
 
 
@@ -119,7 +121,7 @@ def g_loss_fn(generator, discriminator, batch_z, is_training):
 def test():
     g = Generator()
     d = Discriminator()
-    x = tf.random.normal([2, 4, 117])
+    x = tf.random.normal([2, 117, 1])
     z = tf.random.normal([2, 100])
     prob = d(x)
     print(prob)

@@ -1,7 +1,7 @@
 """
 作者：杨文豪
 
-描述：GAN训练生成电池放电时的最高温度
+描述：生成充电到4.2v所用时间的数据
 
 时间：2022/4/15 9:19
 """
@@ -13,8 +13,8 @@ from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import os
 
-b05 = pd.read_csv('./data/extend_data/b_005_extend_all_feature.csv.csv')
-b06 = pd.read_csv('./data/extend_data/b_006_extend_all_feature.csv.csv')
+b05 = pd.read_csv('./data/extend_data/b_005_extend_all_feature.csv')
+b06 = pd.read_csv('./data/extend_data/b_006_extend_all_feature.csv')
 transfer = StandardScaler()
 
 
@@ -113,8 +113,8 @@ def train_for_generator_charge_time(dataset):
         if epoch % 1000 == 1 and epoch != 1:
             # print(d_losses)
             # print(g_losses)
-            generator.save_weights('./model/charge_to_4.2v_time/generator_'+str(epoch)+'.ckpt',)
-            discriminator.save_weights('./model/charge_to_4.2v_time/discriminator_'+str(epoch)+'.ckpt')
+            generator.save_weights('./model/charge_to_4.2v_time/generator.ckpt',)
+            discriminator.save_weights('./model/charge_to_4.2v_time/discriminator.ckpt')
 
 
 if __name__ == '__main__':
