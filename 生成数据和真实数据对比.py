@@ -10,8 +10,8 @@ import pandas as pd
 import os
 import scipy.stats as st
 
-base_path = 'D:/当前可能用到的文件/生成的数据/temperature'
-# base_path = 'D:/当前可能用到的文件/生成的数据/dis_time'
+# base_path = 'D:/当前可能用到的文件/生成的数据/temperature'
+base_path = 'D:/当前可能用到的文件/生成的数据/dis_time'
 # base_path = 'D:/当前可能用到的文件/生成的数据/ic'
 # base_path = 'D:/当前可能用到的文件/生成的数据/charge_time'
 y_name = base_path.split('/')[-1]
@@ -28,7 +28,7 @@ real_data = pd.concat([real_data_b05, real_data_b06], axis=0)
 def draw_g_data_to_r_data():
     for file_name in file_names:
         ger_data = pd.read_csv(base_path + '/' + file_name)
-        result = st.pearsonr(list(ger_data[y_name]), list(real_data[y_name]))
+        result = st.pearsonr(list(ger_data[y_name]), list(real_data['discharge_time']))
         plt.rcParams["font.family"] = "Kaiti"
         plt.xlabel('循环次数')
         plt.ylabel(y_name)
@@ -37,13 +37,13 @@ def draw_g_data_to_r_data():
         if not os.path.exists('D:/当前可能用到的文件/生成的数据/生成数据和真实数据对比图/' + y_name + '/' + file):
             os.mkdir('D:/当前可能用到的文件/生成的数据/生成数据和真实数据对比图/' + y_name + '/' + file)
         for i in range(0, 102):
-            p = st.pearsonr(ger_data[y_name][j:j + 117], real_data[y_name][j:j + 117])
-            if p[0] > 0.9:
+            p = st.pearsonr(ger_data[y_name][j:j + 117], real_data['discharge_time'][j:j + 117])
+            if p[0] > 0.99:
                 print(file_name + '中第' + str(i) + '段数据，索引为:' + str(j) + '~' + str(j + 117) + '，皮尔逊相关系数为：' + str(p[0]))
             plt.title('第' + str(i) + '段数据中' + y_name + '随循环次数的变化')
             plt.plot(real_data['discharge'][j:j + 117], ger_data[y_name][j:j + 117], 'r-', label='生成数据')
             plt.legend()
-            plt.plot(real_data['discharge'][j:j + 117], real_data[y_name][j:j + 117], 'g-', label='真实数据')
+            plt.plot(real_data['discharge'][j:j + 117], real_data['discharge_time'][j:j + 117], 'g-', label='真实数据')
             plt.legend()
             plt.savefig('D:/当前可能用到的文件/生成的数据/生成数据和真实数据对比图/' + y_name + '/' + file +
                         '/第' + str(i) + '段数据中' + y_name + '随循环次数的变化.jpg')
@@ -57,7 +57,7 @@ def test_pierxun():
     data = ''
     for file_name in file_names:
         ger_data = pd.read_csv(base_path + '/' + file_name)
-        result = st.pearsonr(list(ger_data[y_name]), list(real_data[y_name]))
+        result = st.pearsonr(list(ger_data[y_name]), list(real_data['discharge_time']))
         if result[0] > temp:
             temp = result[0]
             data = file_name
@@ -77,8 +77,8 @@ def test_pierxun():
         with open('D:/当前可能用到的文件/生成的数据/生成数据和真实数据对比图/' + y_name + '/' + file + '/readme.txt',
                   'w', encoding='utf-8') as f:
             for i in range(0, 102):
-                p = st.pearsonr(ger_data[y_name][j:j + 117], real_data[y_name][j:j + 117])
-                if p[0] > 0.95:
+                p = st.pearsonr(ger_data[y_name][j:j + 117], real_data['discharge_time'][j:j + 117])
+                if p[0] > 0.99:
                     f.write(file_name + '中第' + str(i) + '段数据，索引为:' + str(j) + '~' + str(j + 117) +
                             '，皮尔逊相关系数为：' + str(p[0]) + '\n')
                     print(file_name + '中第' + str(i) + '段数据，索引为:' + str(j) + '~' + str(j + 117) +

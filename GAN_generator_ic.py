@@ -14,8 +14,8 @@ from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import os
 
-b05 = pd.read_csv('./data/extend_data/b_05_dis_ic.csv')
-b06 = pd.read_csv('./data/extend_data/b_06_dis_ic.csv')
+b05 = pd.read_csv('./data/extend_data/b_005_extend_all_feature.csv.csv')
+b06 = pd.read_csv('./data/extend_data/b_006_extend_all_feature.csv.csv')
 transfer = StandardScaler()
 
 
@@ -24,7 +24,7 @@ def make_gan_dataset():
     for b in [b05, b06]:
         i = 0
         while i < 5851:
-            dataset.append(list(b['ic'][i:i + 117]))
+            dataset.append(list(b['ic_max'][i:i + 117]))
             i += 117
     for i in range(0, len(dataset)):
         dataset[i] = transfer.fit_transform(np.array(dataset[i]).reshape(-1, 1))
@@ -49,13 +49,13 @@ def train_for_generator_ic(dataset):
     dataset = dataset.repeat()
     db_iter = iter(dataset)
     # 创建生成器和判别器
-    if len(os.listdir('./model/ic')) != 0:
+    if len(os.listdir('./model/ic_max')) != 1:
         generator = Generator()
         generator.build(input_shape=(None, z_dim))
-        generator.load_weights('./model/ic/generator.ckpt')
+        generator.load_weights('./model/ic_max/generator.ckpt')
         discriminator = Discriminator()
         discriminator.build(input_shape=(None, 117, 1))
-        discriminator.load_weights('./model/ic/discriminator.ckpt')
+        discriminator.load_weights('./model/ic_max/discriminator.ckpt')
     else:
         generator = Generator()
         generator.build(input_shape=(None, z_dim))
@@ -101,12 +101,12 @@ def train_for_generator_ic(dataset):
             # 将生成的数据转化为DataFrame格式方便存入csv
             g_data = pd.DataFrame()
             for i in range(0, 102):
-                temp = pd.DataFrame(fake_data[i], columns=['ic'])
+                temp = pd.DataFrame(fake_data[i], columns=['ic_max'])
                 g_data = pd.concat([g_data, temp], axis=0)
             # 将生成的数据存入csv
-            g_data[['ic']] \
-                .to_csv('./data/generator_data/ic/generator_data_%d.cvs' % epoch,
-                        index=False, header=['ic'])
+            g_data[['ic_max']] \
+                .to_csv('./data/generator_data/ic_max/generator_data_%d.cvs' % epoch,
+                        index=False, header=['ic_max'])
 
             d_losses.append(float(d_loss))
             g_losses.append(float(g_loss))
@@ -114,8 +114,8 @@ def train_for_generator_ic(dataset):
         if epoch % 1000 == 1 and epoch != 1:
             # print(d_losses)
             # print(g_losses)
-            generator.save_weights('./model/ic/generator_' + str(epoch) + '.ckpt', )
-            discriminator.save_weights('./model/ic/discriminator_' + str(epoch) + '.ckpt')
+            generator.save_weights('./model/ic_max/generator_' + str(epoch) + '.ckpt', )
+            discriminator.save_weights('./model/ic_max/discriminator_' + str(epoch) + '.ckpt')
 
 
 if __name__ == '__main__':

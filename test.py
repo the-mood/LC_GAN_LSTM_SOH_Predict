@@ -16,7 +16,7 @@ import os
 from sklearn.preprocessing import StandardScaler
 import scipy.stats as st
 
-ger_data = pd.read_csv("D:/Downloads/generator_data_8600.cvs")
+# ger_data = pd.read_csv("D:/Downloads/generator_data_8600.cvs")
 real_data_b05 = pd.read_csv("./data/extend_data/b_05.csv")
 real_data_b06 = pd.read_csv("./data/extend_data/b_06.csv")
 real_data = pd.concat([real_data_b05, real_data_b06], axis=0)
@@ -38,16 +38,13 @@ def draw(g_data, r_data):
         j += 117
 
 
-# def test():
-#     data =pd.read_csv('./data/B0005_discharge.csv')
-#     plt.rcParams["font.family"] = "Kaiti"
-#     plt.title('增量容量曲线')
-#     plt.ylabel(data['ic'])
-#     plt.xlim(2.5, 3.85)
+def test():
+    d=real_data_b05.get('discharge')
+    print()
 
 
 if __name__ == '__main__':
-    result = st.pearsonr(list(ger_data['temperature']), list(real_data['temperature']))
-    print(result)
-    draw(ger_data, real_data)
-    # test()
+    # result = st.pearsonr(list(ger_data['temperature']), list(real_data['temperature']))
+    # print(result)
+    # draw(ger_data, real_data)
+    test()

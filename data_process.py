@@ -19,8 +19,6 @@ f_name = 'BatteryAgingARC-FY08Q4'
 battery_path = glob.glob(os.path.join(base_path + '\\' + f_name, '*.mat'))
 
 '''对电池放电数据的处理---开始'''
-
-fea = ['discharge', 'voltage', 'temperature', 'time', 'capacity']
 # b05,b06,b07
 # 反标准化所需
 max_dis = 168
@@ -98,7 +96,7 @@ def process_data(file_name, b_name):
             t_time = np.diff(time[:end])
             t_vol = np.abs(np.diff(voltage[:end]))
             ic = 2 * np.divide(t_time, t_vol)
-            # ic = savgol_filter(ic, 15, 3, mode='nearest')
+            # ic = savgol_filter(ic, 167, 3, mode='nearest')
             ic = np.max(ic[1:])
             t_dict = {'discharge': discharge_Num,
                       'temperature': np.max(np.array(data_B[0][0][0][0][i][3][0][0][2][0])),
@@ -179,37 +177,23 @@ def discharge_battery_data_to_csv(data):
                     header=['discharge', 'temperature', 'discharge_time', 'ic', 'capacity', 'soh'])
 
 
-# 将数据标准化以后存入csv
-def Standard_data_to_csv(data):
-    num = 7
-    for b_data in data:
-        for name in fea:
-            min = float(b_data[name].min())
-            max = float(b_data[name].max())
-            b_data[name] = b_data[name].astype('float')
-            for i in range(0, 168):
-                b_data[name][i] = (b_data[name][i] - min) / (max - min)
-        b_data[fea].to_csv('./data/Standard_data/b0' + str(num) + '.csv', index=False,
-                           header=['discharge', 'voltage', 'temperature', 'time', 'capacity'])
-        num -= 1
-
-
 # 使用滑动窗口扩展数据
-def slide_window_to_extend_data(data):
+def slide_window_to_extend_data():
     '''
     :param data: pd.DataFrame格式，discharge、capacity、soh
         将扩展以后的数据写入csv
     :return:
     '''
     num = 5
-    for b_data in data:
+    for b_name in b_names:
+        b_data=pd.read_csv('./data/all_feature_data/'+b_name+'_all_feature.csv')
         temp_data = b_data[0:117]
         for i in range(1, 51):
             temp_data = pd.concat([temp_data, b_data[i:i + 117]], axis=0)
 
-        temp_data[['discharge', 'temperature', 'discharge_time', 'capacity', 'soh']] \
-            .to_csv('./data/extend_data/b_0' + str(num) + '.csv',
-                    index=False, header=['discharge', 'temperature', 'discharge_time', 'capacity', 'soh'])
+        temp_data[feature] \
+            .to_csv('./data/extend_data/b_0' + str(num) + '_all_feature.csv',
+                    index=False, header=feature)
         num += 1
 
 
@@ -407,11 +391,11 @@ if __name__ == '__main__':
     # data_to_csv(data)
 
     # # 获取数据
-    b_05 = pd.read_csv('./data/B0005_discharge.csv')
-    b_06 = pd.read_csv('./data/B0006_discharge.csv')
+    # b_05 = pd.read_csv('./data/B0005_discharge.csv')
+    # b_06 = pd.read_csv('./data/B0006_discharge.csv')
     # b_07 = pd.read_csv('./data/B0007.csv')
     # Standard_data_to_csv([b_07, b_06, b_05])
-    slide_window_to_extend_data([b_05, b_06])
+    slide_window_to_extend_data()
     # slide_window_to_extend_IC_data()
 
     # 充电数据获取和处理
