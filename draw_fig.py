@@ -228,10 +228,10 @@ def draw_voltage_compare():
                 # print(index)
                 t.append(data.at[index, 'charge_time'])
         # 将电池充电到4.2v的时间分别画在一张图上
-        # plt.plot(range(1, 168), t, clrs[n])
-        # plt.savefig('./image/feature/电池' + b_name + '电压到达4.2v的时间随循环次数的变化.jpg')
-        temp = pd.DataFrame(t, columns=['charge_to_4.2v_time'])
-        temp.to_csv('./data/特征数据/' + b_name + '_charge_to_4.2v_time.csv', index=False, header=['charge_to_4.2v_time'])
+        plt.plot(range(1, 168), t, clrs[n])
+        plt.savefig('./image/feature/电池' + b_name + '电压到达4.2v的时间随循环次数的变化.jpg')
+        # temp = pd.DataFrame(t, columns=['charge_to_4.2v_time'])
+        # temp.to_csv('./data/特征数据/' + b_name + '_charge_to_4.2v_time.csv', index=False, header=['charge_to_4.2v_time'])
 
         # 将三个电池充电到4.2v的时间画在一张图上，查看趋势
         # plt.plot(range(1, 168), t, clrs[n], label=b_name)

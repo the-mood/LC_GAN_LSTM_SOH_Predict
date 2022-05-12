@@ -16,10 +16,12 @@ import os
 from sklearn.preprocessing import StandardScaler
 import scipy.stats as st
 
+b_names = ['B0005', 'B0006', 'B0007']
 # ger_data = pd.read_csv("D:/Downloads/generator_data_8600.cvs")
 real_data_b05 = pd.read_csv("./data/extend_data/b_05.csv")
 real_data_b06 = pd.read_csv("./data/extend_data/b_06.csv")
 real_data = pd.concat([real_data_b05, real_data_b06], axis=0)
+c = ['r-', 'g-', 'b-']
 
 
 def draw(g_data, r_data):
@@ -39,7 +41,17 @@ def draw(g_data, r_data):
 
 
 def test():
-    d=real_data_b05.get('discharge')
+    plt.title('ic_max')
+    plt.xlabel('循环次数')
+    plt.ylabel('ic_max')
+    num = 0
+    for b_name in b_names:
+        data = pd.read_csv('./data/all_feature_data/' + b_name + '_all_feature.csv')
+        # data = pd.read_csv('./data/特征数据/' + b_name + '_ic峰值.csv')
+        plt.plot(range(1, 169), data['ic_max'], c[num], label=b_name)
+        plt.legend()
+        num += 1
+    plt.show()
     print()
 
 

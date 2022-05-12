@@ -42,7 +42,7 @@ def train_for_generator_tem(dataset):
     z_dim = 100  # 隐藏向量z的长度
     epochs = 30000  # 训练步数
     batch_size = 64
-    learning_rate = 0.01
+    learning_rate = 0.001
     is_training = True
     # 无限制的从ds中拿取数据，直到epoch训练完
     dataset = dataset.repeat()
@@ -68,10 +68,10 @@ def train_for_generator_tem(dataset):
     d_losses, g_losses = [], []
     for epoch in range(epochs):
         # 训练鉴别器
-        for _ in range(10):
+        for _ in range(1):
             # 采样隐藏向量
             batch_z = tf.random.normal([batch_size, z_dim])
-            # 采样真实图片
+            # 采样真实数据
             batch_x = next(db_iter)
             # 训练判别器
             with tf.GradientTape() as tape:
@@ -79,15 +79,15 @@ def train_for_generator_tem(dataset):
             grads = tape.gradient(d_loss, discriminator.trainable_variables)
             d_optimizer.apply_gradients(zip(grads, discriminator.trainable_variables))
         # 训练生成器
-        for _ in range(30):
-            # 2. 训练生成器
-            # 采样隐藏向量
-            batch_z = tf.random.normal([batch_size, z_dim])
-            # 生成器前向计算
-            with tf.GradientTape() as tape:
-                g_loss = g_loss_fn(generator, discriminator, batch_z, is_training)
-            grads = tape.gradient(g_loss, generator.trainable_variables)
-            g_optimizer.apply_gradients(zip(grads, generator.trainable_variables))
+        # for _ in range(30):
+        # 2. 训练生成器
+        # 采样隐藏向量
+        batch_z = tf.random.normal([batch_size, z_dim])
+        # 生成器前向计算
+        with tf.GradientTape() as tape:
+            g_loss = g_loss_fn(generator, discriminator, batch_z, is_training)
+        grads = tape.gradient(g_loss, generator.trainable_variables)
+        g_optimizer.apply_gradients(zip(grads, generator.trainable_variables))
 
         if epoch % 200 == 0:
             print(epoch, 'd-loss:', float(d_loss), 'g-loss:', float(g_loss))
