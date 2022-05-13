@@ -105,7 +105,7 @@ def train_for_generator_tem(dataset):
                 g_data = pd.concat([g_data, temp], axis=0)
             # 将生成的数据存入csv
             g_data[['discharge_to_min_voltage_time']] \
-                .to_csv('./data/generator_data/discharge_to_min_voltage_time/generator_data_%d.cvs' % epoch,
+                .to_csv('./data/generator_data/discharge_to_min_voltage_time/generator_data_%d.csv' % epoch,
                         index=False, header=['discharge_to_min_voltage_time'])
 
             d_losses.append(float(d_loss))

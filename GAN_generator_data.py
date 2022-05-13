@@ -113,7 +113,7 @@ def train_for_generator_ic(dataset):
                 g_data = pd.concat([g_data, temp], axis=0)
             # 将生成的数据存入csv
             g_data[[feature_name]] \
-                .to_csv('./data/generator_data/'+feature_name+'/generator_data_%d.cvs' % epoch,
+                .to_csv('./data/generator_data/'+feature_name+'/generator_data_%d.csv' % epoch,
                         index=False, header=[feature_name])
 
             d_losses.append(float(d_loss))

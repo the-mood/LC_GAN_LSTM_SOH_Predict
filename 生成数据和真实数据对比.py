@@ -13,6 +13,8 @@ import scipy.stats as st
 from scipy.signal import savgol_filter
 
 # base_path = 'D:/当前可能用到的文件/生成的数据/discharge_time'
+# base_path = 'D:/当前可能用到的文件/生成的数据/charge_to_4.2v_time'
+
 # base_path = 'D:/当前可能用到的文件/生成的数据/生成数据保存/discharge_time'
 # base_path = 'D:/当前可能用到的文件/生成的数据/生成数据保存/discharge_to_min_voltage_time'
 # base_path = 'D:/当前可能用到的文件/生成的数据/生成数据保存/CC_ratio'
@@ -102,10 +104,36 @@ def test_pierxun():
     print('皮尔逊相关系数最高为：' + str(temp) + '     对应文件为：' + data)
 
 
+def compare_g_data_to_r_data():
+    base_p = 'D:/当前可能用到的文件/生成的数据/charge_to_4.2v_time/generator_data_6800.cvs'
+    f_name = base_p.split('/')[-1].split('.')[0]
+    ger_data = pd.read_csv(base_p)
+    if not os.path.exists('D:/当前可能用到的文件/生成的数据/' + y_name + '/' + f_name):
+        os.mkdir('D:/当前可能用到的文件/生成的数据/' + y_name + '/' + f_name)
+    j = 0
+    # 判断每一段的生成数据和真实数据之间的皮尔逊相关系数
+    for i in range(0, 102):
+        p = st.pearsonr(ger_data[y_name][j:j + 117], real_data[y_name][j:j + 117])
+        if p[0] > 0.99:
+            print(f_name + '中第' + str(i) + '段数据,索引为:' + str(j) + '~' + str(j + 117) +
+                  ',皮尔逊相关系数为：' + str(p[0]))
+        # 画图,画出每一段生成数据和真实数据之间的对比图
+        plt.title('第' + str(i) + '段数据中' + y_name + '随循环次数的变化')
+        plt.plot(real_data['discharge'][j:j + 117], ger_data[y_name][j:j + 117], 'r-', label='生成数据')
+        plt.legend()
+        plt.plot(real_data['discharge'][j:j + 117], real_data[y_name][j:j + 117], 'g-', label='真实数据')
+        plt.legend()
+        plt.savefig('D:/当前可能用到的文件/生成的数据/' + y_name + '/' + f_name +
+                    '/第' + str(i) + '段数据中' + y_name + '随循环次数的变化.jpg')
+        plt.show()
+        j += 117
+    print()
+
+
 # 选中某一个生成的数据，将生成的数据修正后存入csv     y_name=feature_name
 def change_generator_data(feature_name):
     # ger_data = pd.read_csv('./data/generator_data/' + feature_name + '/generator_data_28800.cvs')
-    ger_data = pd.read_csv('./data/generator_data/'+feature_name+'/generator_data_9200.cvs')
+    ger_data = pd.read_csv('./data/generator_data/' + feature_name + '/generator_data_9200.cvs')
     plt.xlabel('循环次数')
     plt.ylabel(feature_name)
     j = 0
@@ -181,8 +209,10 @@ def compare_new_data_to_real_data(feature_name, num):
 
 
 if __name__ == '__main__':
-    draw_g_data_to_r_data()
-    # test_pierxun()
+    # draw_g_data_to_r_data()
+    test_pierxun()
+    # compare_g_data_to_r_data()
+
     # change_generator_data(y_name)
     # n = make_new_data(y_name, 2)
     # compare_new_data_to_real_data(y_name, n)

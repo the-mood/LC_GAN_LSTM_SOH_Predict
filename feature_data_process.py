@@ -67,8 +67,8 @@ def process_ic_max():
         plt.plot(range(1, 169), ic_max, 'r-', label='滤波后的数据')
         plt.legend()
         plt.show()
-        # data['ic_max'] = ic_max
-        # data.to_csv('./data/all_feature_data/' + b_name + '_all_feature.csv')
+        # data['ic_max'][:] = ic_max
+        # data.to_csv('./data/特征数据/' + b_name + '_ic峰值.csv')
 
 
 def process_cc_ratio():
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     # process_charge_voltage()
     # process_CC_ratio()
     # concact_all_data()
-    # slide_window_to_extend_data()
+    slide_window_to_extend_data()
     # process_ic_max()
     # process_ic()
-    process_cc_ratio()
+    # process_cc_ratio()

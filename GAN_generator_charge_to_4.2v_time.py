@@ -104,7 +104,7 @@ def train_for_generator_charge_time(dataset):
                 g_data = pd.concat([g_data, temp], axis=0)
             # 将生成的数据存入csv
             g_data[['charge_to_4.2v_time']] \
-                .to_csv('./data/generator_data/charge_to_4.2v_time/generator_data_%d.cvs' % epoch,
+                .to_csv('./data/generator_data/charge_to_4.2v_time/generator_data_%d.csv' % epoch,
                         index=False, header=['charge_to_4.2v_time'])
 
             d_losses.append(float(d_loss))

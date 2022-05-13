@@ -38,8 +38,8 @@ def make_gan_dataset():
 
 
 def train_for_generator_ic(dataset):
-    tf.random.set_seed(2222)
-    np.random.seed(2222)
+    tf.random.set_seed(22)
+    np.random.seed(22)
     z_dim = 100  # 隐藏向量z的长度
     epochs = 30000  # 训练步数
     batch_size = 64
@@ -105,7 +105,7 @@ def train_for_generator_ic(dataset):
                 g_data = pd.concat([g_data, temp], axis=0)
             # 将生成的数据存入csv
             g_data[['CC_ratio']] \
-                .to_csv('./data/generator_data/CC_ratio/generator_data_%d.cvs' % epoch,
+                .to_csv('./data/generator_data/CC_ratio/generator_data_%d.csv' % epoch,
                         index=False, header=['CC_ratio'])
 
             d_losses.append(float(d_loss))

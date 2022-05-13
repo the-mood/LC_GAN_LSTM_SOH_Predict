@@ -5,6 +5,7 @@
 
 时间：2022/4/8 9:18
 """
+import matplotlib
 import tensorflow as tf
 from tensorflow.keras import optimizers, losses, Sequential
 from tensorflow.keras.layers import LSTM, Dense
@@ -22,6 +23,7 @@ real_data_b05 = pd.read_csv("./data/extend_data/b_05.csv")
 real_data_b06 = pd.read_csv("./data/extend_data/b_06.csv")
 real_data = pd.concat([real_data_b05, real_data_b06], axis=0)
 c = ['r-', 'g-', 'b-']
+plt.rcParams["font.family"] = "Kaiti"
 
 
 def draw(g_data, r_data):
@@ -54,9 +56,14 @@ def test():
     plt.show()
     print()
 
+def t():
+    # 查看路径
+    print(matplotlib.matplotlib_fname())
+
 
 if __name__ == '__main__':
     # result = st.pearsonr(list(ger_data['temperature']), list(real_data['temperature']))
     # print(result)
     # draw(ger_data, real_data)
     test()
+    # t()
